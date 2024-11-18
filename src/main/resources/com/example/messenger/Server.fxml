@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane fx:id="programBack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="360.0" stylesheets="@stylish.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+
+    <HBox fx:id="topBar" alignment="CENTER" prefHeight="69.0" prefWidth="360.0">
+        <Text fx:id="title" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Nimble Natter Network">
+            <font>
+                <Font name="Old English Text MT" size="18.0" />
+            </font>
+        </Text>
+    </HBox>
+
+    <Pane fx:id="mainPane" layoutX="14.0" layoutY="67.0" prefHeight="523.0" prefWidth="332.0">
+        <Text fill="WHITE" layoutX="110.0" layoutY="164.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter the meeting ID:">
+            <font>
+                <Font name="Eras Demi ITC" size="12.0" />
+            </font>
+        </Text>
+
+        <TextField fx:id="meetingID" layoutX="12.0" layoutY="167.0" prefHeight="25.0" prefWidth="308.0" />
+
+        <Text fill="WHITE" layoutX="101.0" layoutY="254.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter meeting password:">
+            <font>
+                <Font name="Eras Demi ITC" size="12.0" />
+            </font>
+        </Text>
+
+        <PasswordField fx:id="password" layoutX="12.0" layoutY="258.0" prefHeight="25.0" prefWidth="308.0" />
+
+        <Text fill="WHITE" layoutX="99.0" layoutY="73.0" strokeType="OUTSIDE" strokeWidth="0.0" text="What should we call you?">
+            <font>
+                <Font name="Eras Demi ITC" size="12.0" />
+            </font>
+        </Text>
+
+        <TextField fx:id="nickname" layoutX="12.0" layoutY="77.0" prefHeight="25.0" prefWidth="308.0" />
+
+        <Button fx:id="Btn" layoutX="12.0" layoutY="320.0" prefHeight="25.0" prefWidth="308.0" text="Join/Create meeting!" />
+    </Pane>
+</AnchorPane>
