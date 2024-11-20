@@ -4,6 +4,14 @@ public class Client {
     private boolean isConnected;
     private Server curServer;
 
+    Client(Server server) {
+
+    }
+
+    Client(byte[] a, int port) {
+
+    }
+
     public Client() {
         isConnected = false;
         curServer = null;

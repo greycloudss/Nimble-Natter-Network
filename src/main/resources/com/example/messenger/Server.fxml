@@ -44,6 +44,6 @@
 
         <TextField fx:id="nickname" layoutX="12.0" layoutY="77.0" prefHeight="25.0" prefWidth="308.0" />
 
-        <Button fx:id="Btn" layoutX="12.0" layoutY="320.0" prefHeight="25.0" prefWidth="308.0" onAction="#onBtn" text="Join/Create meeting!" />
+        <Button fx:id="Btn" layoutX="12.0" layoutY="320.0" prefHeight="25.0" prefWidth="308.0" onAction="#onJoinBtn" text="Join/Create meeting!" />
     </Pane>
 </AnchorPane>

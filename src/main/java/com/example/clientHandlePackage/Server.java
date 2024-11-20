@@ -7,23 +7,35 @@ import javafx.util.Pair;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.net.http.WebSocket;
+import java.util.Arrays;
 
 public class Server {
     private ServerSocket serverSocket = null;
     private Socket socket = null;
     private DataInputStream in = null;
     private DataOutputStream out = null;
-    int port = 80;
+    private int port = 80;
 
-    private ObservableList<Client> clients = FXCollections.observableArrayList();
+    private final ObservableList<Client> clients = FXCollections.observableArrayList();
 
     private String meetingID;
     private String password;
 
+    public Server(int port, String meetingID, String password) throws IOException {
+        System.out.println("Server constructor called as a struct");
+        this.port = port;
+        this.meetingID = meetingID;
+        this.password = password;
+        Socket socket = new Socket(InetAddress.getByAddress(new byte[]{127, 0, 0, 1}), port); //serverSocket
+    }
+
     public Server(String meetingID, String password, int instance) {
-        System.out.println("Server constructor called");
+        System.out.println("Server constructor called as a server");
         try {
             this.meetingID = meetingID;
             this.password = password;
@@ -37,12 +49,15 @@ public class Server {
                     out = new DataOutputStream(socket.getOutputStream());
                 } catch (IOException e) {
                     e.printStackTrace();
+                    System.out.println("Server init failed, cause: threads start");
                 }
             }).start();
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Server init failed");
         }
     }
+
 
     public String getMeetingID() {
         return meetingID;
@@ -66,6 +81,10 @@ public class Server {
 
     public Pair<String, String> returnServerInfo() {
         return new Pair<>(getMeetingID(), getPasswordField());
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
     public void close() {
