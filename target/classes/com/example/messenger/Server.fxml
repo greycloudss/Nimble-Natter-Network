@@ -9,7 +9,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="programBack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="360.0" stylesheets="@stylish.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="programBack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="360.0" stylesheets="@stylish.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.messenger.ControlUnit">
 
     <HBox fx:id="topBar" alignment="CENTER" prefHeight="69.0" prefWidth="360.0">
         <Text fx:id="title" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Nimble Natter Network">
@@ -44,6 +44,6 @@
 
         <TextField fx:id="nickname" layoutX="12.0" layoutY="77.0" prefHeight="25.0" prefWidth="308.0" />
 
-        <Button fx:id="Btn" layoutX="12.0" layoutY="320.0" prefHeight="25.0" prefWidth="308.0" text="Join/Create meeting!" />
+        <Button fx:id="Btn" layoutX="12.0" layoutY="320.0" prefHeight="25.0" prefWidth="308.0" onAction="#onBtn" text="Join/Create meeting!" />
     </Pane>
 </AnchorPane>
