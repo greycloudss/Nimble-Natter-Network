@@ -17,6 +17,7 @@ import javafx.util.Pair;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 enum State {
@@ -41,65 +42,96 @@ public class ControlUnit {
     public TextField messageField = new TextField();
 
     ArrayList<Pair<String, String>> ServerInfo = new ArrayList<>();
-    ArrayList<Server> Servers;
-    Client curClient = new Client();
-
+    List<Server> Servers;
+    Thread msgThread;
     private String pName;
     private String pPass;
     private String pMeetingID;
-    
+
+    Client curClient = new Client(pName);
+
+    Messenger msg;
+
     public void onJoinBtn() {
         if (nickname.getText().isEmpty() || password.getText().isEmpty() || meetingID.getText().isEmpty())
             return;
-
 
         pName = nickname.getText();
         pPass = password.getText();
         pMeetingID = meetingID.getText();
 
         PortScanner pScan = new PortScanner();
-
         Servers = pScan.Servers();
+
+        for (Server server : Servers)
+            ServerInfo.add(new Pair<>(server.getMeetingID(), server.getPasswordField()));
+
         System.out.println(Servers);
-        System.out.println(pScan.Servers());
 
         final boolean contains = ServerInfo.contains(new Pair<>(pMeetingID, pPass));
         final boolean connected = curClient.isConnected() && Servers.contains(curClient.getServer());
 
         switch (determineState(contains, connected)) {
-            case NEITHER:  // create server & join
-                curClient.setServer(new Server(pMeetingID, pPass,  Servers == null ? 0 : Servers.size()));
-                Servers.add(curClient.getServer());
-                ServerInfo.add(new Pair<>(pMeetingID, pPass));
-                System.out.println("create server & join it");
+            case NEITHER: // Create server & join
+
+                //curClient.setServer(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()));
+                if (!ServerInfo.contains(new Pair<>(pMeetingID, pPass))) {
+                    curClient.setServer(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()));
+                    Servers.add(curClient.getServer());
+                    ServerInfo.add(new Pair<>(pMeetingID, pPass));
+                    System.out.println("Create server & join it");
+                }
+
+                for (Server server : Servers) {
+                    System.out.println(server.getMeetingID() + " " + server.getPasswordField() + " "  + server.getSocketPort());
+                }
+
                 switchFXML("messenger.fxml");
                 break;
 
-            case ONLY_CONTAINS: // server exists & join
-                for (Server s : Servers) {
+            case ONLY_CONTAINS: // Server exists & join
+                List<Server> serverCopy = new ArrayList<>(Servers);
+                for (Server s : serverCopy) {
                     if (Objects.equals(s.returnServerInfo(), new Pair<>(pMeetingID, pPass))) {
                         s.addClient(curClient);
                         curClient.setServer(s);
                     }
                 }
-                System.out.println("server exists & joining");
+                System.out.println("Server exists & joining");
                 switchFXML("messenger.fxml");
                 break;
 
-            case ONLY_CONNECTED: // bad outcome pray it doesnt happen
+            case ONLY_CONNECTED: // Unexpected case
                 curClient.connected(false);
-                System.out.println("if you are reading this i officially dont know what happened");
+                try {
+                    curClient.getServer().close();
+                } catch (Exception e) {
+                    curClient.setServer(null);
+                }
+                System.out.println("Unexpected state occurred");
+                System.exit(0);
                 switchFXML("messenger.fxml");
                 break;
 
-            default: // exists and joined already
+            default: // Exists and joined already
                 switchFXML("Messenger");
-                System.out.println("exists and joined already");
-                // if somehow this part of the func is accessed that means the fxml file has not been switched yet
+                System.out.println("Exists and joined already");
                 break;
         }
 
-        recipient = new Text(!recipient.getText().isEmpty() && pMeetingID != null ? pMeetingID : "not Able to load at this moment");
+        recipient = new Text(!recipient.getText().isEmpty() && pMeetingID != null ? pMeetingID : "Not able to load at this moment");
+        msgThread = new Thread(() -> {
+            this.msg = new Messenger(curClient);
+        });
+        msgThread.start();
+    }
+
+    public void awaitCompletion() {
+        try {
+            msgThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void switchFXML(String fxml) {
@@ -123,7 +155,6 @@ public class ControlUnit {
             recipient.setText(roomId != null ? roomId : "Unable to load room ID");
         }
     }
-
 
     State determineState(boolean contains, boolean connected) {
         if (contains && connected) return State.BOTH_TRUE;

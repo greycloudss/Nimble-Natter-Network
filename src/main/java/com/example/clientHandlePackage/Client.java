@@ -1,18 +1,30 @@
 package com.example.clientHandlePackage;
 
+import java.io.IOException;
+
 public class Client {
     private boolean isConnected;
     private Server curServer;
+    private String pName;
 
-    Client(Server server) {
-
+    Client(Server server, String pName) {
+        this.pName = pName;
+        this.curServer = server;
+        curServer = server;
     }
 
-    Client(byte[] a, int port) {
-
+    Client(byte[] ipv4, int port, String pName) {
+        this.pName = pName;
+        PortScanner scanner = new PortScanner(ipv4, port);
+        try {
+            curServer = new Server(port, scanner.Servers().getFirst().getMeetingID(), scanner.Servers().getFirst().getPasswordField());
+        } catch (IOException e) {
+            curServer = null;
+        }
     }
 
-    public Client() {
+    public Client(String pName) {
+        this.pName = pName;
         isConnected = false;
         curServer = null;
     }
