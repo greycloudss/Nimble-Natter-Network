@@ -3,7 +3,6 @@ package com.example.messenger;
 import com.example.clientHandlePackage.Client;
 import com.example.clientHandlePackage.PortScanner;
 import com.example.clientHandlePackage.Server;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -48,7 +47,7 @@ public class ControlUnit {
     private String pPass;
     private String pMeetingID;
 
-    Client curClient = new Client(pName);
+    Client curClient;
 
     Messenger msg;
 
@@ -63,6 +62,8 @@ public class ControlUnit {
         PortScanner pScan = new PortScanner();
         Servers = pScan.Servers();
 
+        curClient = new Client(null, pName);
+
         for (Server server : Servers)
             ServerInfo.add(new Pair<>(server.getMeetingID(), server.getPasswordField()));
 
@@ -76,25 +77,24 @@ public class ControlUnit {
 
                 //curClient.setServer(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()));
                 if (!ServerInfo.contains(new Pair<>(pMeetingID, pPass))) {
-                    curClient.setServer(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()));
+                    curClient = new Client(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()), pName);
                     Servers.add(curClient.getServer());
                     ServerInfo.add(new Pair<>(pMeetingID, pPass));
                     System.out.println("Create server & join it");
                 }
 
                 for (Server server : Servers) {
-                    System.out.println(server.getMeetingID() + " " + server.getPasswordField() + " "  + server.getSocketPort());
+                    System.out.printf("%s %s %d%n", server.getMeetingID(), server.getPasswordField(), server.getSocketPort());
                 }
 
                 switchFXML("messenger.fxml");
                 break;
 
             case ONLY_CONTAINS: // Server exists & join
-                List<Server> serverCopy = new ArrayList<>(Servers);
-                for (Server s : serverCopy) {
+                for (Server s : Servers) {
                     if (Objects.equals(s.returnServerInfo(), new Pair<>(pMeetingID, pPass))) {
+                        curClient = new Client(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()), pName);
                         s.addClient(curClient);
-                        curClient.setServer(s);
                     }
                 }
                 System.out.println("Server exists & joining");
@@ -120,19 +120,18 @@ public class ControlUnit {
         }
 
         recipient = new Text(!recipient.getText().isEmpty() && pMeetingID != null ? pMeetingID : "Not able to load at this moment");
-        msgThread = new Thread(() -> {
-            this.msg = new Messenger(curClient);
-        });
-        msgThread.start();
+        //msgThread = new Thread(() -> this.msg = new Messenger(curClient));
+        //msgThread.start();
+        //awaitCompletion();
     }
 
-    public void awaitCompletion() {
-        try {
-            msgThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+   //public void awaitCompletion() {
+   //    try {
+   //        msgThread.join();
+   //    } catch (InterruptedException e) {
+   //        e.printStackTrace();
+   //    }
+   //}
 
     public void switchFXML(String fxml) {
         try {
@@ -154,6 +153,16 @@ public class ControlUnit {
         if (recipient != null) {
             recipient.setText(roomId != null ? roomId : "Unable to load room ID");
         }
+    }
+
+    public void onSendBtn() {
+        String message = messageField.getText();
+
+        if (message.isEmpty())
+            return;
+
+        curClient.sendMsg(message);
+        messageField.setText("");
     }
 
     State determineState(boolean contains, boolean connected) {

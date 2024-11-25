@@ -15,7 +15,7 @@
     </HBox>
 
     <TextField fx:id="messageField" layoutX="14.0" layoutY="561.0" prefHeight="25.0" prefWidth="282.0" />
-    <Button layoutX="302.0" layoutY="561.0" mnemonicParsing="false" text="Send" />
+    <Button layoutX="302.0" layoutY="561.0" mnemonicParsing="false" onAction="#onSendBtn" text="Send" />
     <ScrollPane fx:id="mainPane" layoutX="14.0" layoutY="69.0" prefHeight="484.0" prefWidth="332.0">
         <Pane prefHeight="484.0" prefWidth="316.0">
             <Pane prefHeight="484.0" prefWidth="160.0">

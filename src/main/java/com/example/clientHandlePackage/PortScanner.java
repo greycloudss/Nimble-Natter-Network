@@ -18,39 +18,13 @@ import java.util.List;
 *
 */
 
-public class PortScanner {
-    private List<Server> Servers = Collections.synchronizedList(new ArrayList<>());
+public class PortScanner { //scan selected ip:port
+    private final List<Server> Servers = Collections.synchronizedList(new ArrayList<>());
     private int firstPort;
     private final int minPort = 80;
-    int port;
+    //int port;
     private InetAddress localIP;
     Thread scanThread;
-
-    public PortScanner(byte[] ipv4, int port) { // specific ip/port
-        try (Socket tmpSocket = new Socket(InetAddress.getByAddress(ipv4), port)) {
-            DataInputStream in = new DataInputStream(tmpSocket.getInputStream());
-            DataOutputStream out = new DataOutputStream(tmpSocket.getOutputStream());
-
-            String str = "Key";
-            out.writeUTF(str);
-
-
-            String serverResponse = in.readUTF();
-            if (serverResponse.contains("$-abcd_$")) {
-                String meetingID = serverResponse.substring(serverResponse.indexOf("$"));
-                String password = serverResponse.substring(serverResponse.lastIndexOf("$") + 1, serverResponse.length());
-                Servers.add(new Server(port, meetingID, password));
-            }
-            this.port = port;
-        } catch (Exception e) {
-            //server straight up doesnt exist
-            this.port = -1;
-            System.out.println(e);
-        }
-        firstPort = -1;
-        scanThread.start();
-    }
-
 
     public PortScanner() { // Scan all ports locally
         try {
@@ -70,16 +44,16 @@ public class PortScanner {
                     DataInputStream in = new DataInputStream(tmpSocket.getInputStream());
                     DataOutputStream out = new DataOutputStream(tmpSocket.getOutputStream());
 
-                    String str = "Key" + curPort;
+                    String str = "Key%d".formatted(curPort);
                     out.writeUTF(str);
                     out.flush();
 
                     String serverResponse = in.readUTF();
                     if (serverResponse.contains("$-abcd_$")) {
                         String meetingID = serverResponse.substring(0,serverResponse.indexOf("$"));
-                        String password = serverResponse.substring(serverResponse.lastIndexOf("$") + 1, serverResponse.length());
+                        String password = serverResponse.substring(serverResponse.lastIndexOf("$") + 1);
                         Servers.add(new Server(curPort, meetingID, password));
-                        System.out.println("Server found on port: " + curPort);
+                        System.out.printf("Server found on port: %d%n", curPort);
                     }
                     counter = 0;
                 } catch (Exception e) {
@@ -107,6 +81,31 @@ public class PortScanner {
     }
 
     public List<Server> Servers() {
-        return Servers != null ? Servers : new ArrayList<>();
+        return Servers.isEmpty() ? new ArrayList<>() : Servers;
     }
 }
+
+//public PortScanner(byte[] ipv4, int port) { // specific ip/port
+//    try (Socket tmpSocket = new Socket(InetAddress.getByAddress(ipv4), port)) {
+//        DataInputStream in = new DataInputStream(tmpSocket.getInputStream());
+//        DataOutputStream out = new DataOutputStream(tmpSocket.getOutputStream());
+//
+//        String str = "Key";
+//        out.writeUTF(str);
+//
+//
+//        String serverResponse = in.readUTF();
+//        if (serverResponse.contains("$-abcd_$")) {
+//            String meetingID = serverResponse.substring(serverResponse.indexOf("$"));
+//            String password = serverResponse.substring(serverResponse.lastIndexOf("$") + 1, serverResponse.length());
+//            Servers.add(new Server(port, meetingID, password));
+//        }
+//        this.port = port;
+//    } catch (Exception e) {
+//        //server straight up doesnt exist
+//        this.port = -1;
+//        System.out.println(e);
+//    }
+//    firstPort = -1;
+//    scanThread.start();
+//}
