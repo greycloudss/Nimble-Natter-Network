@@ -40,16 +40,14 @@ public class ControlUnit {
     @FXML
     public TextField messageField = new TextField();
 
-    ArrayList<Pair<String, String>> ServerInfo = new ArrayList<>();
-    List<Server> Servers;
-    Thread msgThread;
+    private final ArrayList<Pair<String, String>> ServerInfo = new ArrayList<>();
+    private List<Server> Servers;
     private String pName;
     private String pPass;
     private String pMeetingID;
 
     Client curClient;
 
-    Messenger msg;
 
     public void onJoinBtn() {
         if (nickname.getText().isEmpty() || password.getText().isEmpty() || meetingID.getText().isEmpty())
@@ -62,15 +60,15 @@ public class ControlUnit {
         PortScanner pScan = new PortScanner();
         Servers = pScan.Servers();
 
-        curClient = new Client(null, pName);
-
-        for (Server server : Servers)
+        for (Server server : Servers) {
             ServerInfo.add(new Pair<>(server.getMeetingID(), server.getPasswordField()));
-
+            System.out.printf("%s %s%n", server.getMeetingID(), server.getPasswordField());
+        }
+        curClient = new Client(null, pName);
         System.out.println(Servers);
 
-        final boolean contains = ServerInfo.contains(new Pair<>(pMeetingID, pPass));
-        final boolean connected = curClient.isConnected() && Servers.contains(curClient.getServer());
+        final boolean contains = ServerInfo.contains(new Pair<>(pMeetingID, pPass)) && ServerInfo.size() != 0;
+        final boolean connected = curClient.isConnected();
 
         switch (determineState(contains, connected)) {
             case NEITHER: // Create server & join
@@ -92,10 +90,9 @@ public class ControlUnit {
 
             case ONLY_CONTAINS: // Server exists & join
                 for (Server s : Servers) {
-                    if (Objects.equals(s.returnServerInfo(), new Pair<>(pMeetingID, pPass))) {
-                        curClient = new Client(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()), pName);
-                        s.addClient(curClient);
-                    }
+                    if (Objects.equals(s.returnServerInfo(), new Pair<>(pMeetingID, pPass)))
+                        curClient = new Client(s, pName);
+
                 }
                 System.out.println("Server exists & joining");
                 switchFXML("messenger.fxml");
@@ -103,11 +100,8 @@ public class ControlUnit {
 
             case ONLY_CONNECTED: // Unexpected case
                 curClient.connected(false);
-                try {
-                    curClient.getServer().close();
-                } catch (Exception e) {
-                    curClient.setServer(null);
-                }
+                curClient.getServer().close();
+                curClient.setServer(null);
                 System.out.println("Unexpected state occurred");
                 System.exit(0);
                 switchFXML("messenger.fxml");

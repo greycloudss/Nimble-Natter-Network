@@ -1,15 +1,15 @@
 package com.example.clientHandlePackage;
 
 import com.example.messenger.Messenger;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Server {
     private ServerSocket serverSocket;
@@ -21,42 +21,52 @@ public class Server {
     private String meetingID;
     private String password;
     private Messenger server_messenger;
-
+    private ArrayList<Socket> clients = new ArrayList<>();
     public Server(int port, String meetingID, String password) {
         System.out.println("Server constructor called as a struct");
         this.port = port;
         this.meetingID = meetingID;
         this.password = password;
+        try {
+            this.socket = new Socket(InetAddress.getLoopbackAddress(), this.port);
+        } catch (IOException e) {
+            this.socket = null;
+        }
         System.out.printf("Struct server initialized with port: %d%n", port);
     }
 
     public Server(String meetingID, String password, int port) {
         System.out.println("Server constructor called as a server");
-        server_messenger = new Messenger(getSocket());
+
+        this.meetingID = meetingID;
+        this.password = password;
+        this.port = port;
         try {
-            this.meetingID = meetingID;
-            this.password = password;
-            this.port = port;
             serverSocket = new ServerSocket(this.port);
-
-            new Thread(() -> {
-                while (true) {
-                    try {
-                        socket = serverSocket.accept();
-                        System.out.printf("Client connected from: %s%n", socket.getInetAddress());
-
-                        handleClient(socket);
-
-                    } catch (IOException e) {
-                        System.err.printf("Error accepting client: %s%n", e.getMessage());
-                    }
-                }
-            }).start();
-
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.printf("Port %d is in use. Trying another port.%n", this.port);
         }
+
+        new Thread(() -> {
+            while (true) {
+                try {
+                    socket = serverSocket.accept();
+
+                    if (server_messenger == null)
+                        server_messenger = new Messenger(socket);
+
+                    System.out.printf("Client connected from: %s%n", socket.getInetAddress());
+
+                    handleClient(socket);
+                    clients = server_messenger.getClientSockets();
+                } catch (IOException e) {
+                    System.err.printf("Error accepting client: %s%n", e.getMessage());
+                }
+            }
+        }).start();
+
     }
+
 
     private void handleClient(Socket clientSocket) {
         try (
@@ -67,6 +77,7 @@ public class Server {
             System.out.printf("Received message from client: %s%n", received);
 
             if (server_messenger.getClientSockets().contains(clientSocket)) {
+                System.out.print("CLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENT");
                 if (server_messenger.verifyMessage(clientSocket, received.substring(0, received.indexOf(":")), received.substring(received.indexOf(":"))))
                     sendUpdate();
             }else {
@@ -111,10 +122,6 @@ public class Server {
                 }
             }
         }
-    }
-
-    public void addClient(Client client) {
-        //placeholder
     }
 
     public String getMeetingID() {

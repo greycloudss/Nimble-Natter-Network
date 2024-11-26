@@ -14,7 +14,8 @@ public class Client {
 
     public Client(Server server, String pName) {
         this.pName = pName;
-        setServer(server);
+        curServer = server;
+        isConnected = (curServer == null ? false : true);
     }
 
     //Client(byte[] ipv4, int port, String pName) {
@@ -47,7 +48,7 @@ public class Client {
 
     public void setServer(Server server) {
         curServer = server;
-        connected(true);
+        isConnected = (curServer.getSocket() == null ? false : true);
     }
 
     public void receiveMsg() {

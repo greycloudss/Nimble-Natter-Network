@@ -1,23 +1,21 @@
 package com.example.messenger;
 
-import com.example.clientHandlePackage.Client;
-import com.example.clientHandlePackage.Server;
 import javafx.util.Pair;
 
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class Messenger {
-    private Socket server;
-    private ArrayList<Pair<String, String>> messages = new ArrayList<>();
+    private final Socket serverSocket;
+    private final ArrayList<Pair<String, String>> messages = new ArrayList<>();
     private final ArrayList<Socket> clientSockets = new ArrayList<>();
 
     public Messenger(Socket server) {
-        this.server = server;
+        this.serverSocket = server;
     }
 
     public boolean verifyMessage(Socket cl_socket, String name, String message) {
-        if (clientSockets.contains(cl_socket) && !message.isEmpty() && message.length() <= 512) {
+        if (clientSockets.contains(cl_socket) && message.length() <= 512) {
             System.out.printf("Message from %s: %s%n", cl_socket.getInetAddress(), message);
             messages.add(new Pair<>(name, message));
             return true;
@@ -33,8 +31,8 @@ public class Messenger {
         return messages;
     }
 
-    public Socket getServer() {
-        return server;
+    public Socket getServerSocket() {
+        return serverSocket;
     }
 
     public final ArrayList<Socket> getClientSockets() {
@@ -42,10 +40,12 @@ public class Messenger {
     }
 
     public boolean verifyConnection(String received, Socket cl_socket) {
-        if (received.equals("Key%d".formatted(server.getPort())) && cl_socket != null && !clientSockets.contains(cl_socket)) {
+        if (received.equals("Key%d".formatted(serverSocket.getLocalPort())) && cl_socket != null && !clientSockets.contains(cl_socket)) {
             clientSockets.add(cl_socket);
             return true;
-        } else return false;
-
+        } else {
+            System.err.printf("Key mismatch\nExpected [%s], Received [%s]%n", "Key%d".formatted(serverSocket.getLocalPort()), received);
+            return false;
+        }
     }
 }
