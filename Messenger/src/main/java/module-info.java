@@ -8,8 +8,6 @@ module com.example.messenger {
 
     opens com.example.messenger to javafx.fxml;
     exports com.example.messenger;
-    exports com.example.clientHandlePackage.ServerPackage;
-    opens com.example.clientHandlePackage.ServerPackage to javafx.fxml;
-    exports com.example.clientHandlePackage.ClientPackage;
-    opens com.example.clientHandlePackage.ClientPackage to javafx.fxml;
+    exports com.example.clientHandlePackage;
+    opens com.example.clientHandlePackage to javafx.fxml;
 }

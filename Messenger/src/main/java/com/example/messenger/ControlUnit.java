@@ -1,8 +1,8 @@
 package com.example.messenger;
 
-import com.example.clientHandlePackage.ClientPackage.Client;
-import com.example.clientHandlePackage.ClientPackage.PortScanner;
-import com.example.clientHandlePackage.ServerPackage.Server;
+import com.example.clientHandlePackage.Client;
+import com.example.clientHandlePackage.PortScanner;
+import com.example.clientHandlePackage.Server;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
