@@ -80,7 +80,6 @@ public class Server {
 
                 if (server_messenger.verifyConnection(received, clientSocket)) {
                     clientOutputer.writeUTF("%s$-abcd_$%s".formatted(this.meetingID, this.password));
-                    clientOutputer.flush();
                     System.out.println("Client authenticated successfully.");
                 } else {
                     clientOutputer.writeUTF("Invalid Key");

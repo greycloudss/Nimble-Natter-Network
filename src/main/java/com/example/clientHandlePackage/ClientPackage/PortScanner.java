@@ -23,7 +23,7 @@ import java.util.List;
 public class PortScanner { //scan selected ip:port
     private final List<Server> Servers = Collections.synchronizedList(new ArrayList<>());
     private int firstPort;
-    private final int minPort = 420;
+    private final int minPort = 80;
     //int port;
     private InetAddress localIP;
     Thread scanThread;
