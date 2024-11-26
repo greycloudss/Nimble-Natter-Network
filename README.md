@@ -33,9 +33,27 @@ The **Nimble Natter Network** is a lightweight, JavaFX-based networking applicat
 
 ## Architecture
 
-- **Server**: Handles incoming client connections and maintains communication.
-- **Client**: Connects to servers and participates in active sessions.
-- **ControlUnit**: Acts as the bridge between the UI and backend logic, integrating server discovery and dynamic communication handling.
+The Nimble Natter Network employs a modular and scalable architecture designed to facilitate smooth communication between clients and servers:
+
+- **Server Component**:
+  - Accepts incoming client connections.
+  - Manages session details using Meeting IDs and passwords.
+  - Handles message broadcasts and client-specific responses.
+  - Utilizes threading to support multiple simultaneous client connections.
+
+- **Client Component**:
+  - Connects to a server by providing valid Meeting ID and password.
+  - Sends and receives messages in real-time.
+  - Handles errors gracefully during connection or message transmission.
+
+- **Control Unit**:
+  - Manages the interaction between the UI and the networking logic.
+  - Implements logic to create new servers or join existing ones.
+  - Bridges server discovery, client connection, and messaging functionality.
+
+- **Messenger**:
+  - Manages message validation and synchronization between clients.
+  - Keeps track of active client sockets and maintains session consistency.
 
 ## Contribution
 
