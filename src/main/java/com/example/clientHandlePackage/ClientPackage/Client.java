@@ -1,22 +1,26 @@
 package com.example.clientHandlePackage.ClientPackage;
 
 import com.example.clientHandlePackage.ServerPackage.Server;
+import com.example.messenger.ControlUnit;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class Client {
     private boolean isConnected;
-    private Server curServer;
+    private final Server curServer;
     private final String pName;
-    private DataInputStream dataReceiver;
-    private DataOutputStream dataOutputer;
-
-    public Client(Server server, String pName) {
+    Client_Middleware mw;
+    public Client(Server server, String pName, ControlUnit controlUnit) {
         this.pName = pName;
         curServer = server;
-        isConnected = ((curServer == null) ? false : true);
+
+        if (curServer != null) {
+            isConnected = true;
+            mw = new Client_Middleware(this.pName, this.curServer.getSocket(), controlUnit);
+            handleServer();
+        } else isConnected = false;
+
     }
 
     //Client(byte[] ipv4, int port, String pName) {
@@ -47,47 +51,29 @@ public class Client {
         return curServer;
     }
 
-    public void setServer(Server server) {
-        curServer = server;
-        isConnected = (curServer.getSocket() == null ? false : true);
-    }
+    public void handleServer() {
+        new Thread(() -> {
+            try (
+                    DataOutputStream dataOutputer = new DataOutputStream(curServer.getSocket().getOutputStream());
+                    DataInputStream dataReceiver = new DataInputStream(curServer.getSocket().getInputStream())
+            ) {
+                dataOutputer.writeUTF(mw.constructMessage("Key%d".formatted(curServer.getSocketPort())));
+                if (dataReceiver.readUTF().contains(curServer.getMeetingID()) && dataReceiver.readUTF().contains(curServer.getPasswordField())) {
+                    this.isConnected = true;
+                    System.out.println("Server connected");
+                }
+                //at this point i dont care about verification just please let me message
 
-    public void receiveMsg() {
-        try {
-            if (getServer() == null)
-                throw new IllegalStateException("Server is not initialized.");
-
-            if (dataReceiver == null )
-                dataReceiver = new DataInputStream(getServer().getSocket().getInputStream());
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void sendMsg(String msg) {
-        try {
-            if (curServer == null || !isConnected) {
-                if (isConnected)
-                    System.out.print("connected");
-                else
-                    System.out.print("not connected");
-
-                System.out.println(curServer);
-
-                System.err.println("Error: Client is not connected to any server.");
-                return;
+                while (true) {
+                    String received = dataReceiver.readUTF();
+                    System.out.println("AAAAA");
+                    System.out.println(received);
+                    dataOutputer.writeUTF(mw.constructMessage(dataReceiver.readUTF()));
+                }
+            } catch (Exception e) {
+                isConnected = false;
             }
 
-            if (dataOutputer == null)
-                dataOutputer = new DataOutputStream(getServer().getSocket().getOutputStream());
-
-            dataOutputer.writeUTF("Key" + getServer().getSocketPort());
-            dataOutputer.writeUTF(pName + msg);
-        } catch (Exception e) {
-            System.out.println("Unable to send message");
-
-            throw new RuntimeException(e);
-        }
+        }).start();
     }
 }

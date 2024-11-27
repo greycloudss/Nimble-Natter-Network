@@ -50,12 +50,15 @@ public class Server {
                     socket = serverSocket.accept();
 
                     if (server_messenger == null)
-                        server_messenger = new Messenger(socket);
+                        server_messenger = new Messenger(serverSocket);
 
                     System.out.printf("Client connected from: %s%n", socket.getInetAddress());
 
-                    handleClient(socket);
-                } catch (IOException e) {
+                    //for (Socket s : server_messenger.getClientSockets())
+                        handleClient(socket);
+                } catch (Exception e) {
+                    socket = null;
+                    e.printStackTrace();
                     System.err.printf("Error accepting client: %s%n", e.getMessage());
                 }
             }
@@ -64,36 +67,40 @@ public class Server {
     }
 
 
-    private void handleClient(Socket clientSocket) {
+    private void handleClient(Socket clientSocket) throws IOException {
         try (
                 DataInputStream clientReceiver = new DataInputStream(clientSocket.getInputStream());
                 DataOutputStream clientOutputer = new DataOutputStream(clientSocket.getOutputStream())
         ) {
-            String received = clientReceiver.readUTF();
-            System.out.printf("Received message from client: %s%n", received);
 
-            if (server_messenger.getClientSockets().contains(clientSocket)) {
-                System.out.print("CLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENTCLIENT");
-                if (server_messenger.verifyMessage(clientSocket, received.substring(0, received.indexOf(":")), received.substring(received.indexOf(":"))))
-                    sendUpdate();
-            }else {
-
-                if (server_messenger.verifyConnection(received, clientSocket)) {
-                    clientOutputer.writeUTF("%s$-abcd_$%s".formatted(this.meetingID, this.password));
-                    System.out.println("Client authenticated successfully.");
+            try  {
+                String received = clientReceiver.readUTF();
+                System.out.printf("Received message from client: %s%n", received);
+                if (server_messenger.getClientSockets().contains(clientSocket) &&
+                        server_messenger.verifyMessage(clientSocket, received.substring(0, received.indexOf(":")), received.substring(received.indexOf(":"))+1)) {
+                    clientOutputer.writeUTF(server_messenger.getMessages().getLast().getKey() + server_messenger.getMessages().getLast().getValue());
                 } else {
-                    clientOutputer.writeUTF("Invalid Key");
-                    System.out.println("Invalid key received from client.");
+                    if (server_messenger.verifyConnection(received, clientSocket)) {
+                        try {
+                            clientOutputer.writeUTF("%s$-abcd_$%s".formatted(this.meetingID, this.password));
+                        } catch (IOException e) {
+                            System.out.print("Socket dead");
+                            return;
+                        }
+                        server_messenger.addClientSocket(clientSocket);
+                        System.out.println("Client authenticated successfully.");
+                    } else {
+                        try {
+                            clientOutputer.writeUTF("Invalid Key");
+                        } catch (IOException e) {
+                            System.out.print("Socket dead");
+                            return;
+                        }
+                        System.out.println("Invalid key received from client.");
+                    }
                 }
-            }
-        } catch (IOException e) {
-            System.err.printf("Communication error with client: %s%n", e.getMessage());
-        } finally {
-            try {
-                clientSocket.close();
-                System.out.printf("Client disconnected: %s%n", clientSocket.getInetAddress());
-            } catch (IOException e) {
-                System.err.printf("Error closing client socket: %s%n", e.getMessage());
+            } catch (Exception e) {
+                System.out.print("nothing");
             }
         }
     }
@@ -108,13 +115,6 @@ public class Server {
                System.out.println("Message sent.");
             } catch (IOException e) {
                 System.err.printf("Communication error with client: %s%n", e.getMessage());
-            } finally {
-                try {
-                    clientSocket.close();
-                    System.out.printf("Client disconnected: %s%n", clientSocket.getInetAddress());
-                } catch (IOException e) {
-                    System.err.printf("Error closing client socket: %s%n", e.getMessage());
-                }
             }
         }
     }
@@ -141,7 +141,8 @@ public class Server {
 
     public void close() {
         try {
-            if (socket != null) socket.close();
+            for (Socket s : server_messenger.getClientSockets())
+                s.close();
             if (serverSocket != null) serverSocket.close();
             System.out.println("Server closed.");
         } catch (IOException e) {

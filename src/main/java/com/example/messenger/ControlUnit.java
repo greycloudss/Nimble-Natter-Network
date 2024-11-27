@@ -1,6 +1,7 @@
 package com.example.messenger;
 
 import com.example.clientHandlePackage.ClientPackage.Client;
+import com.example.clientHandlePackage.ClientPackage.Client_Middleware;
 import com.example.clientHandlePackage.ClientPackage.PortScanner;
 import com.example.clientHandlePackage.ServerPackage.Server;
 import javafx.fxml.FXML;
@@ -64,7 +65,7 @@ public class ControlUnit {
             ServerInfo.add(new Pair<>(server.getMeetingID(), server.getPasswordField()));
             System.out.printf("%s %s%n", server.getMeetingID(), server.getPasswordField());
         }
-        curClient = new Client(null, pName);
+        curClient = new Client(null, pName, ControlUnit.this);
         System.out.println(Servers);
 
         final boolean contains = ServerInfo.contains(new Pair<>(pMeetingID, pPass)) && ServerInfo.size() != 0;
@@ -75,7 +76,7 @@ public class ControlUnit {
 
                 //curClient.setServer(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()));
                 if (!ServerInfo.contains(new Pair<>(pMeetingID, pPass))) {
-                    curClient = new Client(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()), pName);
+                    curClient = new Client(new Server(pMeetingID, pPass, pScan.returnFirstNotUsedPort()), pName, ControlUnit.this);
                     Servers.add(curClient.getServer());
                     ServerInfo.add(new Pair<>(pMeetingID, pPass));
                     System.out.println("Create server & join it");
@@ -91,7 +92,7 @@ public class ControlUnit {
             case ONLY_CONTAINS: // Server exists & join
                 for (Server s : Servers) {
                     if (Objects.equals(s.returnServerInfo(), new Pair<>(pMeetingID, pPass)))
-                        curClient = new Client(s, pName);
+                        curClient = new Client(s, pName, ControlUnit.this);
 
                 }
                 System.out.println("Server exists & joining");
@@ -100,8 +101,6 @@ public class ControlUnit {
 
             case ONLY_CONNECTED: // Unexpected case
                 curClient.connected(false);
-                curClient.getServer().close();
-                curClient.setServer(null);
                 System.out.println("Unexpected state occurred");
                 System.exit(0);
                 switchFXML("messenger.fxml");
@@ -119,13 +118,13 @@ public class ControlUnit {
         //awaitCompletion();
     }
 
-   //public void awaitCompletion() {
-   //    try {
-   //        msgThread.join();
-   //    } catch (InterruptedException e) {
-   //        e.printStackTrace();
-   //    }
-   //}
+    //public void awaitCompletion() {
+    //    try {
+    //        msgThread.join();
+    //    } catch (InterruptedException e) {
+    //        e.printStackTrace();
+    //    }
+    //}
 
     public void switchFXML(String fxml) {
         try {
@@ -156,13 +155,17 @@ public class ControlUnit {
         }
     }
 
+    public void updateScreen(String message) {
+        System.out.print(message);
+    }
+
     public void onSendBtn() {
         String message = messageField.getText();
 
         if (message.isEmpty())
             return;
 
-        curClient.sendMsg(message);
+
         messageField.setText("");
     }
 

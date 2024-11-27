@@ -2,15 +2,16 @@ package com.example.clientHandlePackage.ServerPackage;
 
 import javafx.util.Pair;
 
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class Messenger {
-    private final Socket serverSocket;
+    private final ServerSocket serverSocket;
     private final ArrayList<Pair<String, String>> messages = new ArrayList<>();
     private final ArrayList<Socket> clientSockets = new ArrayList<>();
 
-    public Messenger(Socket server) {
+    public Messenger(ServerSocket server) {
         this.serverSocket = server;
     }
 
@@ -31,7 +32,7 @@ public class Messenger {
         return messages;
     }
 
-    public Socket getServerSocket() {
+    public ServerSocket getServerSocket() {
         return serverSocket;
     }
 
@@ -40,7 +41,7 @@ public class Messenger {
     }
 
     public boolean verifyConnection(String received, Socket cl_socket) {
-        if (received.equals("Key%d".formatted(serverSocket.getLocalPort())) && cl_socket != null && !clientSockets.contains(cl_socket)) {
+        if (received.substring(received.indexOf(":") + 1).equals("Key%d".formatted(serverSocket.getLocalPort())) && cl_socket != null && !clientSockets.contains(cl_socket)) {
             clientSockets.add(cl_socket);
             return true;
         } else {
