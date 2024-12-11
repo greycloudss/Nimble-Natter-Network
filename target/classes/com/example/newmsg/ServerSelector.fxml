@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane fx:id="programBack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="360.0" stylesheets="@stylish.css" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.newmsg.HelloController">
+
+    <HBox fx:id="topBar" alignment="CENTER" prefHeight="69.0" prefWidth="360.0">
+        <Text fx:id="title" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Nimble Natter Network">
+            <font>
+                <Font name="Old English Text MT" size="18.0" />
+            </font>
+        </Text>
+    </HBox>
+
+    <Pane fx:id="mainPane" layoutX="14.0" layoutY="67.0" prefHeight="523.0" prefWidth="332.0">
+        <Text fill="WHITE" layoutX="148.0" layoutY="104.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:">
+            <font>
+                <Font name="Eras Demi ITC" size="12.0" />
+            </font>
+        </Text>
+
+        <TextField fx:id="name" layoutX="12.0" layoutY="107.0" prefHeight="25.0" prefWidth="308.0" />
+
+        <Text fill="WHITE" layoutX="161.0" layoutY="177.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ip">
+            <font>
+                <Font name="Eras Demi ITC" size="12.0" />
+            </font>
+        </Text>
+        <TextField fx:id="port" layoutX="12.0" layoutY="258.0" prefHeight="25.0" prefWidth="308.0" />
+
+        <Text fill="WHITE" layoutX="153.0" layoutY="255.0" strokeType="OUTSIDE" strokeWidth="0.0" text="port">
+            <font>
+                <Font name="Eras Demi ITC" size="12.0" />
+            </font>
+        </Text>
+
+        <TextField fx:id="ip" layoutX="12.0" layoutY="180.0" prefHeight="25.0" prefWidth="308.0" />
+
+        <Button fx:id="Btn" layoutX="12.0" layoutY="320.0" prefHeight="25.0" prefWidth="308.0" onAction="#jcBtn" text="Join/Create meeting!"/>
+    </Pane>
+</AnchorPane>
